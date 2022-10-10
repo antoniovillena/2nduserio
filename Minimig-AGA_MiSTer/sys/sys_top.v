@@ -46,15 +46,12 @@ module sys_top
 	//////////// SDR ///////////
 	output [12:0] SDRAM_A,
 	inout  [15:0] SDRAM_DQ,
-	output        SDRAM_DQML,
-	output        SDRAM_DQMH,
 	output        SDRAM_nWE,
 	output        SDRAM_nCAS,
 	output        SDRAM_nRAS,
 	output        SDRAM_nCS,
 	output  [1:0] SDRAM_BA,
 	output        SDRAM_CLK,
-	output        SDRAM_CKE,
 
 	//////////// VGA ///////////
 	output  [7:0] VGA_R,
@@ -93,7 +90,8 @@ module sys_top
 	output  [7:0] LED,
 
 	///////// USER IO ///////////
-	inout   [7:0] USER_IO
+	inout   [7:0] USER_IO,
+	inout   [7:0] USER_IO2
 );
 
 //////////////////////  Secondary SD  ///////////////////////////////////
@@ -1366,21 +1364,39 @@ alsa alsa
 
 assign USER_IO[0] = |user_mode   ? user_out[0] : !user_out[0]  ? 1'b0 : 1'bZ;
 assign USER_IO[1] = user_mode[0] ? user_out[1] : !user_out[1]  ? 1'b0 : 1'bZ;
-assign USER_IO[2] = !(SW[1] ? HDMI_I2S   : user_out[2]) ? 1'b0 : 1'bZ;
-assign USER_IO[3] =                       !user_out[3]  ? 1'b0 : 1'bZ;
-assign USER_IO[4] = user_mode[1] ? user_out[4] : !(SW[1] ? HDMI_SCLK  : user_out[4]) ? 1'b0 : 1'bZ;
-assign USER_IO[5] = !(SW[1] ? HDMI_LRCLK : user_out[5]) ? 1'b0 : 1'bZ;
-assign USER_IO[6] =                       !user_out[6]  ? 1'b0 : 1'bZ;
-assign USER_IO[7] =                       !user_out[7]  ? 1'b0 : 1'bZ;
+assign USER_IO[2] = !user_out[2] ? 1'b0 : 1'bZ;
+assign USER_IO[3] = !user_out[3] ? 1'b0 : 1'bZ;
+assign USER_IO[4] = user_mode[1] ? user_out[4] : !user_out[4] ? 1'b0 : 1'bZ;
+assign USER_IO[5] = !user_out[5] ? 1'b0 : 1'bZ;
+assign USER_IO[6] = !user_out[6] ? 1'b0 : 1'bZ;
+assign USER_IO[7] = !user_out[7] ? 1'b0 : 1'bZ;
 
 assign user_in[0] = |user_mode   ? 1'b0 : USER_IO[0];
 assign user_in[1] = user_mode[0] ? 1'b0 : USER_IO[1];
-assign user_in[2] = SW[1] | USER_IO[2];
-assign user_in[3] =         USER_IO[3];
-assign user_in[4] = user_mode[1] ? 1'b0 : SW[1] | USER_IO[4];
-assign user_in[5] = SW[1] | USER_IO[5];
-assign user_in[6] =         USER_IO[6];
-assign user_in[7] =         USER_IO[7];
+assign user_in[2] = USER_IO[2];
+assign user_in[3] = USER_IO[3];
+assign user_in[4] = user_mode[1] ? 1'b0 : USER_IO[4];
+assign user_in[5] = USER_IO[5];
+assign user_in[6] = USER_IO[6];
+assign user_in[7] = USER_IO[7];
+
+assign USER_IO2[0] = !user_out2[0] ? 1'b0 : 1'bZ;
+assign USER_IO2[1] = !user_out2[1] ? 1'b0 : 1'bZ;
+assign USER_IO2[2] = !user_out2[2] ? 1'b0 : 1'bZ;
+assign USER_IO2[3] = !user_out2[3] ? 1'b0 : 1'bZ;
+assign USER_IO2[4] = !user_out2[4] ? 1'b0 : 1'bZ;
+assign USER_IO2[5] = !user_out2[5] ? 1'b0 : 1'bZ;
+assign USER_IO2[6] = !user_out2[6] ? 1'b0 : 1'bZ;
+assign USER_IO2[7] = !user_out2[7] ? 1'b0 : 1'bZ;
+
+assign user_in2[0] = USER_IO2[0];
+assign user_in2[1] = USER_IO2[1];
+assign user_in2[2] = USER_IO2[2];
+assign user_in2[3] = USER_IO2[3];
+assign user_in2[4] = USER_IO2[4];
+assign user_in2[5] = USER_IO2[5];
+assign user_in2[6] = USER_IO2[6];
+assign user_in2[7] = USER_IO2[7];
 
 ///////////////////  User module connection ////////////////////////////
 
@@ -1415,6 +1431,7 @@ sync_fix sync_v(clk_vid, vs_emu, vs_fix);
 sync_fix sync_h(clk_vid, hs_emu, hs_fix);
 
 wire  [7:0] user_out, user_in;
+wire  [7:0] user_out2, user_in2;
 wire  [1:0] user_mode;
 wire        user_osd;
 assign clk_ihdmi= clk_vid;
@@ -1539,15 +1556,12 @@ emu emu
 
 	.SDRAM_DQ(SDRAM_DQ),
 	.SDRAM_A(SDRAM_A),
-	.SDRAM_DQML(SDRAM_DQML),
-	.SDRAM_DQMH(SDRAM_DQMH),
 	.SDRAM_BA(SDRAM_BA),
 	.SDRAM_nCS(SDRAM_nCS),
 	.SDRAM_nWE(SDRAM_nWE),
 	.SDRAM_nRAS(SDRAM_nRAS),
 	.SDRAM_nCAS(SDRAM_nCAS),
 	.SDRAM_CLK(SDRAM_CLK),
-	.SDRAM_CKE(SDRAM_CKE),
 
 	.BUTTONS(btn),
 	.OSD_STATUS(osd_status),

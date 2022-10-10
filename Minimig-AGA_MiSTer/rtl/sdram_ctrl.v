@@ -44,10 +44,8 @@ module sdram_ctrl
 	output reg        sd_we,
 	output reg        sd_ras,
 	output reg        sd_cas,
-	output reg  [1:0] sd_dqm,
 	inout  reg [15:0] sd_data,
 	output reg        sd_clk,
-	output            sd_cke,
 	// chip
 	input      [24:1] chipAddr,
 	input             chipL,
@@ -69,7 +67,6 @@ module sdram_ctrl
 );
 
 assign sd_cs = 0;
-assign sd_cke = 1;
 
 //// parameters ////
 localparam [2:0]
@@ -269,7 +266,6 @@ always @ (posedge sysclk) begin
 		slot_type             <= IDLE;
 		casaddr               <= 0;
 		rcnt                  <= 0;
-		sd_dqm                <= 3;
 		sd_ba                 <= 0;
 		if(sdram_state == 0) begin
 			case(initstate)
@@ -301,7 +297,6 @@ always @ (posedge sysclk) begin
 				cas_sd_cas      <= 1;
 				cas_sd_we       <= 1;
 				cas_dqm         <= 0;
-				sd_dqm          <= 3;
 				slot_type       <= IDLE;
 
 				if(~&rcnt) rcnt <= rcnt + 1'd1;
@@ -347,11 +342,9 @@ always @ (posedge sysclk) begin
 			2 : begin
 				sd_addr         <= {1'b1, casaddr}; // AUTO PRECHARGE
 				sd_cas          <= cas_sd_cas;
-				sd_dqm          <= 0;
 				if(!cas_sd_we) begin
 					sd_data      <= datawr;
 					sd_addr[12:11]<= cas_dqm;
-					sd_dqm       <= cas_dqm;
 					sd_we        <= 0;
 				end
 				write_ack       <= 0; // indicate to write that it's safe to accept the next write
