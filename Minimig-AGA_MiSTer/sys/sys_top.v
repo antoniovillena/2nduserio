@@ -77,16 +77,6 @@ module sys_top
 	input         BTN_OSD,
 	input         BTN_RESET,
 
-	////////// I/O ALT /////////
-	//output        SD_SPI_CS,
-	input         SD_SPI_MISO,
-	output        SD_SPI_CLK,
-	output        SD_SPI_MOSI,
-
-	inout         SDCD_SPDIF,
-	output        IO_SCL,
-	inout         IO_SDA,
-
 	////////// ADC //////////////
 	output        ADC_SCK,
 	input         ADC_SDO,
@@ -111,18 +101,7 @@ wire SD_CS, SD_CLK, SD_MOSI;
 wire [3:0] SDIO_DAT;
 wire SDIO_CMD;
 wire SDIO_CLK;
-
-	wire sd_miso = SDIO_DAT[0];
-wire SD_MISO = mcp_sdcd ? sd_miso : SD_SPI_MISO;
-
-	assign SDIO_DAT[2:1]= 2'bZZ;
-	assign SDIO_DAT[3]  = SW[3] ? 1'bZ  : SD_CS;
-	assign SDIO_CLK     = SW[3] ? 1'bZ  : SD_CLK;
-	assign SDIO_CMD     = SW[3] ? 1'bZ  : SD_MOSI;
-//	assign SD_SPI_CS    = mcp_sdcd ? ((~VGA_EN & sog & ~cs1) ? 1'b1 : 1'bZ) : SD_CS;
-
-assign SD_SPI_CLK  = mcp_sdcd ? 1'bZ : SD_CLK;
-assign SD_SPI_MOSI = mcp_sdcd ? 1'bZ : SD_MOSI;
+wire SD_MISO;
 
 //////////////////////  LEDs/Buttons  ///////////////////////////////////
 
@@ -134,30 +113,15 @@ wire led_d =  led_disk[1]  ? ~led_disk[0]  : ~(led_disk[0] | gp_out[29]);
 wire led_u = ~led_user;
 wire led_locked;
 
-	assign LED_POWER = (SW[3] | led_p) ? 1'bZ : 1'b0;
-	assign LED_HDD   = (SW[3] | led_d) ? 1'bZ : 1'b0;
-	assign LED_USER  = (SW[3] | led_u) ? 1'bZ : 1'b0;
+	assign LED_POWER = led_p ? 1'bZ : 1'b0;
+	assign LED_HDD   = led_d ? 1'bZ : 1'b0;
+	assign LED_USER  = led_u ? 1'bZ : 1'b0;
 
 //LEDs on main board
 assign LED = (led_overtake & led_state) | (~led_overtake & {1'b0,led_locked,1'b0, ~led_p, 1'b0, ~led_d, 1'b0, ~led_u});
 
 wire btn_r, btn_o, btn_u;
-	assign {btn_r,btn_o,btn_u} = ~{BTN_RESET,BTN_OSD,BTN_USER} | {mcp_btn[1],mcp_btn[2],mcp_btn[0]};
-
-wire [2:0] mcp_btn;
-wire       mcp_sdcd;
-mcp23009 mcp23009
-(
-	.clk(FPGA_CLK2_50),
-
-	.btn(mcp_btn),
-	.led({led_p, led_d, led_u}),
-	.sd_cd(mcp_sdcd),
-
-	.scl(IO_SCL),
-	.sda(IO_SDA)
-);
-
+	assign {btn_r,btn_o,btn_u} = ~{BTN_RESET,BTN_OSD,BTN_USER};
 
 reg btn_user, btn_osd;
 always @(posedge FPGA_CLK2_50) begin
@@ -183,7 +147,7 @@ end
 
 // gp_in[31] = 0 - quick flag that FPGA is initialized (HPS reads 1 when FPGA is not in user mode)
 //                 used to avoid lockups while JTAG loading
-wire [31:0] gp_in = {1'b0, btn_user | btn[1], btn_osd | btn[0], SW[3], 8'd0, io_ver, io_ack, io_wide, io_dout};
+wire [31:0] gp_in = {1'b0, btn_user | btn[1], btn_osd | btn[0], 1'b0, 8'd0, io_ver, io_ack, io_wide, io_dout};
 wire [31:0] gp_out;
 
 wire  [1:0] io_ver = 1; // 0 - obsolete. 1 - optimized HPS I/O. 2,3 - reserved for future.
@@ -1287,11 +1251,11 @@ csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
 
 	wire cs1 = (vga_fb | vga_scaler) ? vgas_cs : vga_cs;
 
-	assign VGA_VS = (VGA_EN | SW[3]) ? 1'bZ      :((((vga_fb | vga_scaler) ? ~vgas_vs : ~vga_vs) | csync_en) ^ VS[12]);
-	assign VGA_HS = (VGA_EN | SW[3]) ? 1'bZ      : (((vga_fb | vga_scaler) ? (csync_en ? ~vgas_cs : ~vgas_hs) : (csync_en ? ~vga_cs : ~vga_hs)) ^ HS[12]);
-	assign VGA_R  = (VGA_EN | SW[3]) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[23:16] : vga_o[23:16];
-	assign VGA_G  = (VGA_EN | SW[3]) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[15:8]  : vga_o[15:8];
-	assign VGA_B  = (VGA_EN | SW[3]) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[7:0]   : vga_o[7:0];
+	assign VGA_VS = (VGA_EN) ? 1'bZ      :((((vga_fb | vga_scaler) ? ~vgas_vs : ~vga_vs) | csync_en) ^ VS[12]);
+	assign VGA_HS = (VGA_EN) ? 1'bZ      : (((vga_fb | vga_scaler) ? (csync_en ? ~vgas_cs : ~vgas_hs) : (csync_en ? ~vga_cs : ~vga_hs)) ^ HS[12]);
+	assign VGA_R  = (VGA_EN) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[23:16] : vga_o[23:16];
+	assign VGA_G  = (VGA_EN) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[15:8]  : vga_o[15:8];
+	assign VGA_B  = (VGA_EN) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[7:0]   : vga_o[7:0];
 
 reg video_sync = 0;
 always @(posedge clk_vid) begin
@@ -1320,13 +1284,11 @@ end
 
 /////////////////////////  Audio output  ////////////////////////////////
 
-assign SDCD_SPDIF =(SW[3] & ~spdif) ? 1'b0 : 1'bZ;
-
 	wire analog_l, analog_r;
 
-	assign AUDIO_SPDIF = SW[3] ? 1'bZ : SW[0] ? HDMI_LRCLK : spdif;
-	assign AUDIO_R     = SW[3] ? 1'bZ : SW[0] ? HDMI_I2S   : analog_r;
-	assign AUDIO_L     = SW[3] ? 1'bZ : SW[0] ? HDMI_SCLK  : analog_l;
+	assign AUDIO_SPDIF = SW[0] ? HDMI_LRCLK : spdif;
+	assign AUDIO_R     = SW[0] ? HDMI_I2S   : analog_r;
+	assign AUDIO_L     = SW[0] ? HDMI_SCLK  : analog_l;
 
 assign HDMI_MCLK = clk_audio;
 wire clk_audio;
@@ -1589,12 +1551,6 @@ emu emu
 
 	.BUTTONS(btn),
 	.OSD_STATUS(osd_status),
-
-	.SD_SCK(SD_CLK),
-	.SD_MOSI(SD_MOSI),
-	.SD_MISO(SD_MISO),
-	.SD_CS(SD_CS),
-	.SD_CD(mcp_sdcd & (SW[0] ? VGA_HS : (SW[3] | SDCD_SPDIF))),
 
 	.UART_CTS(uart_rts),
 	.UART_RTS(uart_cts),
