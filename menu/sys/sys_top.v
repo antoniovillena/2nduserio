@@ -46,15 +46,12 @@ module sys_top
 	//////////// SDR ///////////
 	output [12:0] SDRAM_A,
 	inout  [15:0] SDRAM_DQ,
-	output        SDRAM_DQML,
-	output        SDRAM_DQMH,
 	output        SDRAM_nWE,
 	output        SDRAM_nCAS,
 	output        SDRAM_nRAS,
 	output        SDRAM_nCS,
 	output  [1:0] SDRAM_BA,
 	output        SDRAM_CLK,
-	output        SDRAM_CKE,
 
 `ifdef MISTER_DUAL_SDRAM
 	////////// SDR #2 //////////
@@ -96,14 +93,7 @@ module sys_top
 `endif
 
 	////////// I/O ALT /////////
-	//output        SD_SPI_CS,
-	input         SD_SPI_MISO,
-	output        SD_SPI_CLK,
-	output        SD_SPI_MOSI,
-
 	inout         SDCD_SPDIF,
-	output        IO_SCL,
-	inout         IO_SDA,
 
 	////////// ADC //////////////
 	output        ADC_SCK,
@@ -126,6 +116,9 @@ module sys_top
 
 //////////////////////  Secondary SD  ///////////////////////////////////
 wire SD_CS, SD_CLK, SD_MOSI;
+wire SDRAM_DQML, SDRAM_DQMH, SDRAM_CKE;
+wire IO_SCL, IO_SDA;
+wire SD_SPI_CS, SD_SPI_MISO, SD_SPI_CLK, SD_SPI_MOSI;
 
 `ifndef MISTER_DUAL_SDRAM
 	wire sd_miso = SW[3] | SDIO_DAT[0];

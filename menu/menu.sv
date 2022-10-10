@@ -430,9 +430,9 @@ assign AUDIO_L = mt32_i2s_l;
 assign AUDIO_R = mt32_i2s_r;
 assign AUDIO_S = 1;
 
-//assign USER_OUT[0]   = 1;
-//assign USER_OUT[1]   = UART_RXD;
-//assign USER_OUT[6:2] = '1;
+assign USER_OUT[0]   = 1;
+assign USER_OUT[1]   = UART_RXD;
+assign USER_OUT[6:2] = '1;
 assign UART_TXD      = midi_rx;
 
 

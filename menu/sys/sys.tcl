@@ -24,25 +24,15 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ARDUINO_IO[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ARDUINO_IO[*]
 
 #============================================================
-# I2C LEDS/BUTTONS
-#============================================================
-set_location_assignment PIN_U14 -to IO_SCL
-set_location_assignment PIN_AG9 -to IO_SDA
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to IO_S*
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to IO_S*
-set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to IO_S*
-
-#============================================================
 # USER PORT
 #============================================================
-set_location_assignment PIN_AE15 -to USER_IO[7]
-set_location_assignment PIN_AF17 -to USER_IO[6]
-set_location_assignment PIN_AF15 -to USER_IO[5]
-set_location_assignment PIN_AG16 -to USER_IO[4]
-set_location_assignment PIN_AH11 -to USER_IO[3]
-set_location_assignment PIN_AH12 -to USER_IO[2]
-set_location_assignment PIN_AH9 -to USER_IO[1]
-set_location_assignment PIN_AG11 -to USER_IO[0]
+set_location_assignment PIN_AG13 -to USER_IO[6]
+set_location_assignment PIN_AG10 -to USER_IO[5]
+set_location_assignment PIN_AG9 -to USER_IO[4]
+set_location_assignment PIN_U14 -to USER_IO[3]
+set_location_assignment PIN_U13 -to USER_IO[2]
+set_location_assignment PIN_AG8 -to USER_IO[1]
+set_location_assignment PIN_AH8 -to USER_IO[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to USER_IO[*]
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to USER_IO[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to USER_IO[*]
@@ -89,10 +79,7 @@ set_location_assignment PIN_AG14 -to SDRAM_DQ[12]
 set_location_assignment PIN_AD5 -to SDRAM_DQ[13]
 set_location_assignment PIN_AF4 -to SDRAM_DQ[14]
 set_location_assignment PIN_AH3 -to SDRAM_DQ[15]
-set_location_assignment PIN_AG13 -to SDRAM_DQML
-set_location_assignment PIN_AF13 -to SDRAM_DQMH
 set_location_assignment PIN_AD20 -to SDRAM_CLK
-set_location_assignment PIN_AG10 -to SDRAM_CKE
 set_location_assignment PIN_AA19 -to SDRAM_nWE
 set_location_assignment PIN_AA18 -to SDRAM_nCAS
 set_location_assignment PIN_Y18 -to SDRAM_nCS
@@ -104,18 +91,6 @@ set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_*
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to SDRAM_DQ[*]
 set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[*]
 set_instance_assignment -name ALLOW_SYNCH_CTRL_USAGE OFF -to *|SDRAM_*
-
-#============================================================
-# SPI SD
-#============================================================
-#set_location_assignment PIN_AE15 -to SD_SPI_CS
-set_location_assignment PIN_AH8  -to SD_SPI_MISO
-set_location_assignment PIN_AG8  -to SD_SPI_CLK
-set_location_assignment PIN_U13  -to SD_SPI_MOSI
-set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to SD_SPI*
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SD_SPI*
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to SD_SPI*
-
 
 #============================================================
 # CLOCK
