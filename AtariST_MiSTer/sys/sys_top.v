@@ -115,16 +115,16 @@ module sys_top
 wire SD_CS, SD_CLK, SD_MOSI;
 
 	wire sd_miso = SDIO_DAT[0];
-wire SD_MISO = mcp_sdcd ? sd_miso : SD_SPI_MISO;
+wire SD_MISO = SD_SPI_MISO;
 
 	assign SDIO_DAT[2:1]= 2'bZZ;
 	assign SDIO_DAT[3]  = SD_CS;
 	assign SDIO_CLK     = SD_CLK;
 	assign SDIO_CMD     = SD_MOSI;
-//	assign SD_SPI_CS    = mcp_sdcd ? ((~VGA_EN & sog & ~cs1) ? 1'b1 : 1'bZ) : SD_CS;
+//	assign SD_SPI_CS    = SD_CS;
 
-assign SD_SPI_CLK  = mcp_sdcd ? 1'bZ : SD_CLK;
-assign SD_SPI_MOSI = mcp_sdcd ? 1'bZ : SD_MOSI;
+assign SD_SPI_CLK  = SD_CLK;
+assign SD_SPI_MOSI = SD_MOSI;
 
 //////////////////////  LEDs/Buttons  ///////////////////////////////////
 
@@ -144,22 +144,7 @@ wire led_locked;
 assign LED = (led_overtake & led_state) | (~led_overtake & {1'b0,led_locked,1'b0, ~led_p, 1'b0, ~led_d, 1'b0, ~led_u});
 
 wire btn_r, btn_o, btn_u;
-	assign {btn_r,btn_o,btn_u} = ~{BTN_RESET,BTN_OSD,BTN_USER} | {mcp_btn[1],mcp_btn[2],mcp_btn[0]};
-
-wire [2:0] mcp_btn;
-wire       mcp_sdcd;
-mcp23009 mcp23009
-(
-	.clk(FPGA_CLK2_50),
-
-	.btn(mcp_btn),
-	.led({led_p, led_d, led_u}),
-	.sd_cd(mcp_sdcd),
-
-	.scl(IO_SCL),
-	.sda(IO_SDA)
-);
-
+	assign {btn_r,btn_o,btn_u} = ~{BTN_RESET,BTN_OSD,BTN_USER};
 
 reg btn_user, btn_osd;
 always @(posedge FPGA_CLK2_50) begin
@@ -1588,7 +1573,7 @@ emu emu
 	.SD_MOSI(SD_MOSI),
 	.SD_MISO(SD_MISO),
 	.SD_CS(SD_CS),
-	.SD_CD(mcp_sdcd & (SW[0] ? VGA_HS : SDCD_SPDIF)),
+	.SD_CD(1'b0),
 
 	.UART_CTS(uart_rts),
 	.UART_RTS(uart_cts),
