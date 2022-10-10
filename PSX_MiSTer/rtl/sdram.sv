@@ -28,14 +28,11 @@ module sdram
    
 	inout  reg [15:0]  SDRAM_DQ,    // 16 bit bidirectional data bus
 	output reg [12:0]  SDRAM_A,     // 13 bit multiplexed address bus
-	output             SDRAM_DQML,  // two byte masks
-	output             SDRAM_DQMH,  // 
 	output reg  [1:0]  SDRAM_BA,    // two banks
 	output             SDRAM_nCS,   // a single chip select
 	output             SDRAM_nWE,   // write enable
 	output             SDRAM_nRAS,  // row address select
 	output             SDRAM_nCAS,  // columns address select
-	output             SDRAM_CKE,   // clock enable
 	output             SDRAM_CLK,   // clock for chip
 
 	input              refreshForce,                   

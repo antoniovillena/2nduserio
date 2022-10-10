@@ -53,7 +53,6 @@ module emu
 	output        VGA_F1,
 	output [1:0]  VGA_SL,
 	output        VGA_SCALER, // Force VGA scaler
-	output        VGA_DISABLE, // analog out is off
 
 	input  [11:0] HDMI_WIDTH,
 	input  [11:0] HDMI_HEIGHT,
@@ -110,13 +109,6 @@ module emu
 	//ADC
 	inout   [3:0] ADC_BUS,
 
-	//SD-SPI
-	output        SD_SCK,
-	output        SD_MOSI,
-	input         SD_MISO,
-	output        SD_CS,
-	input         SD_CD,
-
 	//High latency DDR3 RAM interface
 	//Use for non-critical time purposes
 	output        DDRAM_CLK,
@@ -132,30 +124,13 @@ module emu
 
 	//SDRAM interface with lower latency
 	output        SDRAM_CLK,
-	output        SDRAM_CKE,
 	output [12:0] SDRAM_A,
 	output  [1:0] SDRAM_BA,
 	inout  [15:0] SDRAM_DQ,
-	output        SDRAM_DQML,
-	output        SDRAM_DQMH,
 	output        SDRAM_nCS,
 	output        SDRAM_nCAS,
 	output        SDRAM_nRAS,
 	output        SDRAM_nWE,
-
-`ifdef MISTER_DUAL_SDRAM
-	//Secondary SDRAM
-	//Set all output SDRAM_* signals to Z ASAP if SDRAM2_EN is 0
-	input         SDRAM2_EN,
-	output        SDRAM2_CLK,
-	output [12:0] SDRAM2_A,
-	output  [1:0] SDRAM2_BA,
-	inout  [15:0] SDRAM2_DQ,
-	output        SDRAM2_nCS,
-	output        SDRAM2_nCAS,
-	output        SDRAM2_nRAS,
-	output        SDRAM2_nWE,
-`endif
 
 	input         UART_CTS,
 	output        UART_RTS,
@@ -188,8 +163,6 @@ assign LED_DISK  = 0;
 assign LED_POWER = 0;
 assign BUTTONS   = 0;
 assign VGA_SCALER= 0;
-
-assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 
 wire [11:0] DisplayWidth;
 wire [11:0] DisplayHeight;
@@ -1225,14 +1198,11 @@ sdram sdram
 (
    .SDRAM_DQ   (SDRAM_DQ),
    .SDRAM_A    (SDRAM_A),
-   .SDRAM_DQML (SDRAM_DQML),
-   .SDRAM_DQMH (SDRAM_DQMH),
    .SDRAM_BA   (SDRAM_BA),
    .SDRAM_nCS  (SDRAM_nCS),
    .SDRAM_nWE  (SDRAM_nWE),
    .SDRAM_nRAS (SDRAM_nRAS),
    .SDRAM_nCAS (SDRAM_nCAS),
-   .SDRAM_CKE  (SDRAM_CKE),
    .SDRAM_CLK  (SDRAM_CLK),
    
    .SDRAM_EN(1),
@@ -1285,70 +1255,11 @@ wire        spuram_done;
 assign spuram_dataRead = sdr_sdram_dout2[31:0];
 assign spuram_done     = sdram_readack2 | sdram_writeack2;
 
-`ifdef MISTER_DUAL_SDRAM
-
-sdram sdram2
-(
-	.SDRAM_DQ   (SDRAM2_DQ),
-   .SDRAM_A    (SDRAM2_A),
-   .SDRAM_DQML (),
-   .SDRAM_DQMH (),
-   .SDRAM_BA   (SDRAM2_BA),
-   .SDRAM_nCS  (SDRAM2_nCS),
-   .SDRAM_nWE  (SDRAM2_nWE),
-   .SDRAM_nRAS (SDRAM2_nRAS),
-   .SDRAM_nCAS (SDRAM2_nCAS),
-   .SDRAM_CKE  (),
-   .SDRAM_CLK  (SDRAM2_CLK),
-   .SDRAM_EN   (SDRAM2_EN),
-
-	.init(~pll_locked),
-	.clk(clk_3x),
-	.clk_base(clk_1x),
-	
-	.refreshForce(1'b0),
-	.ram_idle(),
-
-	.ch1_addr(spuram_Adr),
-	.ch1_din(),
-	.ch1_dout(sdr_sdram_dout2),
-	.ch1_req(spuram_ena & spuram_rnw),
-	.ch1_rnw(1'b1),
-	.ch1_128(1'b0),
-	.ch1_ready(sdram_readack2),
-	.ch1_reqprocessed(),
-
-	.ch2_addr (spuram_Adr),
-	.ch2_din  (spuram_dataWrite),
-	.ch2_dout (),
-	.ch2_req  (spuram_ena & ~spuram_rnw),
-	.ch2_rnw  (1'b0),
-   .ch2_be   (spuram_be),
-	.ch2_ready(sdram_writeack2),
-
-	.ch3_addr(0),
-	.ch3_din(),
-	.ch3_dout(),
-	.ch3_req(1'b0),
-	.ch3_rnw(1'b1),
-	.ch3_ready(),
-
-	.dmafifo_adr  (0),
-	.dmafifo_data (0),
-	.dmafifo_empty(1'b1),
-	.dmafifo_read ()
-);
-
-`else
-
 wire SDRAM2_EN = 0;
 
 assign sdr_sdram_dout2 = '0;
 assign sdram_readack2 = '0;
 assign sdram_writeack2 = '0;
-
-`endif
-
 
 assign DDRAM_CLK = clk_2x;
 
@@ -1476,8 +1387,6 @@ always_ff @(posedge CLK_VIDEO) if (CE_PIXEL) begin
 	video_aspect.green <= (vbl || hbl) ? 8'd0 : g;
 	video_aspect.blue <= (vbl || hbl) ? 8'd0 : b;
 	{aspect_x, aspect_y} <= video_isPal ? aspect_ratio_lut_pal[v_total] : aspect_ratio_lut_ntsc[v_total];
-
-	VGA_DISABLE <= fast_forward;
 
 	h_pos <= h_pos + 1'd1;
 	if (~old_vb && vbl)
