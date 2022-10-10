@@ -128,7 +128,7 @@ always @(posedge FPGA_CLK2_50) begin
 		if(&deb_user) btn_user <= 1;
 		if(!deb_user) btn_user <= 0;
 
-		deb_osd <= {deb_osd[6:0], btn_o | user_osd | ~KEY[0]};
+		deb_osd <= {deb_osd[6:0], btn_o | ~KEY[0]};
 		if(&deb_osd) btn_osd <= 1;
 		if(!deb_osd) btn_osd <= 0;
 	end
@@ -1355,23 +1355,16 @@ alsa alsa
 
 ////////////////  User I/O (USB 3.0 connector) /////////////////////////
 
-assign USER_IO[0] = |user_mode   ? user_out[0] : !user_out[0]  ? 1'b0 : 1'bZ;
-assign USER_IO[1] = user_mode[0] ? user_out[1] : !user_out[1]  ? 1'b0 : 1'bZ;
+assign USER_IO[0] = !user_out[0] ? 1'b0 : 1'bZ;
+assign USER_IO[1] = !user_out[1] ? 1'b0 : 1'bZ;
 assign USER_IO[2] = !user_out[2] ? 1'b0 : 1'bZ;
 assign USER_IO[3] = !user_out[3] ? 1'b0 : 1'bZ;
-assign USER_IO[4] = user_mode[1] ? user_out[4] : !user_out[4] ? 1'b0 : 1'bZ;
+assign USER_IO[4] = !user_out[4] ? 1'b0 : 1'bZ;
 assign USER_IO[5] = !user_out[5] ? 1'b0 : 1'bZ;
 assign USER_IO[6] = !user_out[6] ? 1'b0 : 1'bZ;
 assign USER_IO[7] = !user_out[7] ? 1'b0 : 1'bZ;
 
-assign user_in[0] = |user_mode   ? 1'b0 : USER_IO[0];
-assign user_in[1] = user_mode[0] ? 1'b0 : USER_IO[1];
-assign user_in[2] = USER_IO[2];
-assign user_in[3] = USER_IO[3];
-assign user_in[4] = user_mode[1] ? 1'b0 : USER_IO[4];
-assign user_in[5] = USER_IO[5];
-assign user_in[6] = USER_IO[6];
-assign user_in[7] = USER_IO[7];
+assign user_in = USER_IO;
 
 assign USER_IO2[0] = !user_out2[0] ? 1'b0 : 1'bZ;
 assign USER_IO2[1] = !user_out2[1] ? 1'b0 : 1'bZ;
@@ -1382,14 +1375,7 @@ assign USER_IO2[5] = !user_out2[5] ? 1'b0 : 1'bZ;
 assign USER_IO2[6] = !user_out2[6] ? 1'b0 : 1'bZ;
 assign USER_IO2[7] = !user_out2[7] ? 1'b0 : 1'bZ;
 
-assign user_in2[0] = USER_IO2[0];
-assign user_in2[1] = USER_IO2[1];
-assign user_in2[2] = USER_IO2[2];
-assign user_in2[3] = USER_IO2[3];
-assign user_in2[4] = USER_IO2[4];
-assign user_in2[5] = USER_IO2[5];
-assign user_in2[6] = USER_IO2[6];
-assign user_in2[7] = USER_IO2[7];
+assign user_in2 = USER_IO2;
 
 ///////////////////  User module connection ////////////////////////////
 

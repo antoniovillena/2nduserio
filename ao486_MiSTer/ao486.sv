@@ -159,8 +159,6 @@ wire         JOY_CLK, JOY_LOAD, JOY_SPLIT, JOY_MDSEL;
 wire   [5:0] JOY_MDIN  = JOY_FLAG[2] ? {USER_IN[6],USER_IN[3],USER_IN[5],USER_IN[7],USER_IN[1],USER_IN[2]} : '1;
 wire         JOY_DATA  = JOY_FLAG[1] ? USER_IN[5] : '1;
 //assign       USER_OUT  = JOY_FLAG[2] ? {3'b111,JOY_SPLIT,3'b111,JOY_MDSEL} : JOY_FLAG[1] ? {6'b111011,JOY_CLK,JOY_LOAD} : '1;
-assign       USER_MODE = JOY_FLAG[2:1] ;
-assign       USER_OSD  = JOY_DB1[10] & JOY_DB1[6];
 
 reg  db9md_ena=1'b0;
 reg  db9_1p_ena=1'b0,db9_2p_ena=1'b0;
@@ -319,6 +317,11 @@ wire        ps2_mouse_data_in;
 
 wire  [1:0] buttons;
 wire [63:0] status;
+
+wire [15:0] JOY0_USB;
+wire [15:0] JOY1_USB;
+wire [15:0] JOY2_USB;
+wire [15:0] JOY3_USB;
 
 wire [15:0] joystick_l_analog_0;
 wire [15:0] joystick_l_analog_1;

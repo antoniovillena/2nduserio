@@ -60,7 +60,7 @@ module emu
 	output        HDMI_FREEZE,
 
 `ifdef MISTER_FB
-	// Use framebuffer in DDRAM (USE_FB=1 in qsf)
+	// Use framebuffer in DDRAM
 	// FB_FORMAT:
 	//    [2:0] : 011=8bpp(palette) 100=16bpp 101=24bpp 110=32bpp
 	//    [3]   : 0=16bits 565 1=16bits 1555
@@ -109,13 +109,6 @@ module emu
 
 	//ADC
 	inout   [3:0] ADC_BUS,
-
-	//SD-SPI
-	output        SD_SCK,
-	output        SD_MOSI,
-	input         SD_MISO,
-	output        SD_CS,
-	input         SD_CD,
 
 	//High latency DDR3 RAM interface
 	//Use for non-critical time purposes
@@ -173,7 +166,6 @@ assign       USER_OSD  = JOY_DB1[10] & JOY_DB1[6];
 `ifdef SECOND_MT32
 assign       USER_OUT2[6:0] = USER_OUT_MT32;
 `endif
-
 
 reg  db9md_ena=1'b0;
 reg  db9_1p_ena=1'b0,db9_2p_ena=1'b0;
@@ -252,7 +244,6 @@ assign VGA_SCALER= 0;
 assign HDMI_FREEZE = 0;
 
 assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = 0;
-assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 
 wire       vcrop_en = status[42];
 reg        en216p;

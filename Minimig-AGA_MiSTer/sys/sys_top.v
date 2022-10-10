@@ -94,13 +94,6 @@ module sys_top
 	inout   [7:0] USER_IO2
 );
 
-//////////////////////  Secondary SD  ///////////////////////////////////
-wire SD_CS, SD_CLK, SD_MOSI;
-wire [3:0] SDIO_DAT;
-wire SDIO_CMD;
-wire SDIO_CLK;
-wire SD_MISO;
-
 //////////////////////  LEDs/Buttons  ///////////////////////////////////
 
 reg [7:0] led_overtake = 0;
@@ -1251,9 +1244,9 @@ csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
 
 	assign VGA_VS = (VGA_EN) ? 1'bZ      :((((vga_fb | vga_scaler) ? ~vgas_vs : ~vga_vs) | csync_en) ^ VS[12]);
 	assign VGA_HS = (VGA_EN) ? 1'bZ      : (((vga_fb | vga_scaler) ? (csync_en ? ~vgas_cs : ~vgas_hs) : (csync_en ? ~vga_cs : ~vga_hs)) ^ HS[12]);
-	assign VGA_R  = (VGA_EN) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[23:16] : vga_o[23:16];
-	assign VGA_G  = (VGA_EN) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[15:8]  : vga_o[15:8];
-	assign VGA_B  = (VGA_EN) ? 6'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[7:0]   : vga_o[7:0];
+	assign VGA_R  = (VGA_EN) ? 8'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[23:16] : vga_o[23:16];
+	assign VGA_G  = (VGA_EN) ? 8'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[15:8]  : vga_o[15:8];
+	assign VGA_B  = (VGA_EN) ? 8'bZZZZZZ :  (vga_fb | vga_scaler) ? vgas_o[7:0]   : vga_o[7:0];
 
 reg video_sync = 0;
 always @(posedge clk_vid) begin
@@ -1389,14 +1382,7 @@ assign USER_IO2[5] = !user_out2[5] ? 1'b0 : 1'bZ;
 assign USER_IO2[6] = !user_out2[6] ? 1'b0 : 1'bZ;
 assign USER_IO2[7] = !user_out2[7] ? 1'b0 : 1'bZ;
 
-assign user_in2[0] = USER_IO2[0];
-assign user_in2[1] = USER_IO2[1];
-assign user_in2[2] = USER_IO2[2];
-assign user_in2[3] = USER_IO2[3];
-assign user_in2[4] = USER_IO2[4];
-assign user_in2[5] = USER_IO2[5];
-assign user_in2[6] = USER_IO2[6];
-assign user_in2[7] = USER_IO2[7];
+assign user_in2 = USER_IO2;
 
 ///////////////////  User module connection ////////////////////////////
 
@@ -1575,7 +1561,9 @@ emu emu
 	.USER_OSD(user_osd),
 	.USER_MODE(user_mode),
 	.USER_OUT(user_out),
-	.USER_IN(user_in)
+	.USER_IN(user_in),
+	.USER_OUT2(user_out2),
+	.USER_IN2(user_in2)
 );
 
 endmodule
