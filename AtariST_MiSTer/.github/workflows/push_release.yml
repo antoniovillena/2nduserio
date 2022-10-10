@@ -1,0 +1,22 @@
+name: Push Release
+
+on:
+  push:
+    branches:
+      - master
+  repository_dispatch:
+    types: [push_release]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Release
+      run: ./.github/push_release.sh theypsilon@gmail.com neurorulez@gmail.com
+      env:
+        NOTIFICATION_API_KEY: ${{ secrets.NOTIFICATION_API_KEY }}
+        FORCED: ${{ github.event.client_payload.forced }}
