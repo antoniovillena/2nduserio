@@ -66,6 +66,7 @@ module joystick
 	input [15:0]  ana_1,
 	input [15:0]  ana_2,
 	input  [1:0]  mode,
+	input  [1:0]  dis,
 
 	output reg [7:0] readdata,
 	input         write
@@ -82,7 +83,7 @@ always @(posedge clk) begin
 	end
 end
 
-always @(posedge clk) readdata <= (mode == 3) ? 8'hff : {jb4, jb3, jb2, jb1, |JOY2_Y, |JOY2_X, |JOY1_Y, |JOY1_X};
+always @(posedge clk) readdata <= (mode == 3) ? 8'hff : {jb4 | dis[1], jb3 | dis[1], jb2 | dis[0], jb1 | dis[0], |JOY2_Y | dis[1], |JOY2_X | dis[1], |JOY1_Y | dis[0], |JOY1_X | dis[0]};
 
 reg  [7:0] JOY1_X,JOY1_Y,JOY2_X,JOY2_Y;
 reg [10:0] CLK_DIV;
@@ -124,7 +125,6 @@ reg       gravis_clk = 0;
 always @(posedge clk) begin : joy_block
 	reg [4:0] gravis_pos;
 	reg use_dpad1, use_dpad2;
-	reg seen_joy1, seen_joy2;
 
 	if (!rst_n) begin
 		JOY1_X <= 128;
@@ -137,8 +137,6 @@ always @(posedge clk) begin : joy_block
 		{jb1, jb2, jb3, jb4} <= 4'b1111;
 		use_dpad1 <= 1;
 		use_dpad2 <= 1;
-		seen_joy1 <= 0;
-		seen_joy2 <= 0;
 	end
 	else begin
 		jb1 <= mode == 2 ? gravis_clk : !JOY1_BUT1;
@@ -180,19 +178,17 @@ always @(posedge clk) begin : joy_block
 		CLK_DIV <= CLK_DIV + 1'b1;
 		if (CLK_DIV==100) begin
 			CLK_DIV <= 0;
-			if (seen_joy1 && JOY1_X) JOY1_X <= JOY1_X - 1'b1;
-			if (seen_joy1 && JOY1_Y) JOY1_Y <= JOY1_Y - 1'b1;
-			if (seen_joy2 && JOY2_X) JOY2_X <= JOY2_X - 1'b1;
-			if (seen_joy2 && JOY2_Y) JOY2_Y <= JOY2_Y - 1'b1;
+			if (JOY1_X) JOY1_X <= JOY1_X - 1'b1;
+			if (JOY1_Y) JOY1_Y <= JOY1_Y - 1'b1;
+			if (JOY2_X) JOY2_X <= JOY2_X - 1'b1;
+			if (JOY2_Y) JOY2_Y <= JOY2_Y - 1'b1;
 		end
 
 		if((ana_1[7:0] > 60 && ana_1[7:0] < 196) || (ana_1[15:8] > 60 && ana_1[15:8] < 196)) use_dpad1 <= 0;
 		else if(dig_1[3:0]) use_dpad1 <= 1;
-		seen_joy1 <= seen_joy1 || ~use_dpad1 || dig_1;
 
 		if((ana_2[7:0] > 60 && ana_2[7:0] < 196) || (ana_2[15:8] > 60 && ana_2[15:8] < 196)) use_dpad2 <= 0;
 		else if(dig_2[3:0]) use_dpad2 <= 1;
-		seen_joy2 <= seen_joy2 || ~use_dpad2 || dig_2;
 
 		if (write) begin
 			JOY1_X <= ~use_dpad1 ? {~ana_1[7],  ana_1[6:0]}  : JOY1_LEFT  ? 8'd4 : JOY1_RIGHT ? 8'd252 : 8'd128;

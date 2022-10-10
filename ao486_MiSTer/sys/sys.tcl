@@ -41,6 +41,7 @@ set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to USER_IO
 #============================================================
 # USER PORT 2
 #============================================================
+
 set_location_assignment PIN_AF13 -to USER_IO2[7]
 set_location_assignment PIN_AG13 -to USER_IO2[6]
 set_location_assignment PIN_AG10 -to USER_IO2[5]

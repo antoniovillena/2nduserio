@@ -52,6 +52,7 @@ module emu
 	output        VGA_F1,
 	output [1:0]  VGA_SL,
 	output        VGA_SCALER, // Force VGA scaler
+	output        VGA_DISABLE, // analog out is off
 
 	input  [11:0] HDMI_WIDTH,
 	input  [11:0] HDMI_HEIGHT,
@@ -144,7 +145,6 @@ module emu
 	// 2..6 - USR2..USR6
 	// Set USER_OUT to 1 to read from USER_IN.
 
-
 	input   [7:0] USER_IN,
 	output  [7:0] USER_OUT,
 	input   [7:0] USER_IN2,
@@ -201,6 +201,7 @@ wire [15:0] JOY1 = db9_2p_ena ? JOY_DB2 : db9_1p_ena ? JOY0_USB : JOY1_USB;
 wire [15:0] JOY2 = db9_2p_ena ? JOY0_USB : db9_1p_ena ? JOY1_USB : JOY2_USB;
 wire [15:0] JOY3 = db9_2p_ena ? JOY1_USB : db9_1p_ena ? JOY2_USB : JOY3_USB;
 
+
 assign ADC_BUS  = 'Z;
 assign {SDRAM_A, SDRAM_BA, SDRAM_DQ, SDRAM_CLK, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
 
@@ -208,6 +209,7 @@ assign LED_DISK[1] = 0;
 assign LED_POWER   = 0;
 assign BUTTONS     = {~ps2_reset_n, 1'b0};
 assign HDMI_FREEZE = 0;
+assign VGA_DISABLE = 0;
 
 led hdd_led(clk_sys, |mgmt_req[5:0], LED_DISK[0]);
 led fdd_led(clk_sys, |mgmt_req[7:6], LED_USER);
@@ -216,14 +218,14 @@ led fdd_led(clk_sys, |mgmt_req[7:6], LED_USER);
 // 0         1         2         3          4         5         6
 // 01234567890123456789012345678901 23456789012345678901234567890123
 // 0123456789ABCDEFGHIJKLMNOPQRSTUV 0123456789ABCDEFGHIJKLMNOPQRSTUV
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXX
+// XXXXXXXXXXXXXXXXXXXXXXXXX XXXXXX XXXXXXXXXXXXXXXXXXX
 
 `include "build_id.v"
 localparam CONF_STR =
 {
 	"AO486;UART115200:4000000(Turbo 115200),MIDI;",
-	"S0,IMG,Floppy A:;",
-	"S1,IMG,Floppy B:;",
+	"S0,IMGIMAVFD,Floppy A:;",
+	"S1,IMGIMAVFD,Floppy B:;",
 	"O12,Write Protect,None,A:,B:,A: & B:;",
 	"-;",
 	"S2,VHD,IDE 0-0;",
@@ -249,7 +251,6 @@ localparam CONF_STR =
 	"P1oBC,Stereo Mix,none,25%,50%,100%;",
 
 	"P2,Hardware;",
-	"P2-;",
 	"P2o01,Boot 1st,Floppy/Hard Disk,Floppy,Hard Disk,CD-ROM;",
 	"P2o23,Boot 2nd,NONE,Floppy,Hard Disk,CD-ROM;",
 	"P2o45,Boot 3rd,NONE,Floppy,Hard Disk,CD-ROM;",
@@ -267,6 +268,11 @@ localparam CONF_STR =
 `endif
 	"P2-;",
 	"P2OA,USER I/O,MIDI,COM2;",
+	"P2-;",
+	"P2OCD,Joystick type,2 Buttons,4 Buttons,Gravis Pro,None;",
+	"P2oFG,Joystick Mode,2 Joysticks,2 Sticks,2 Wheels,4-axes Wheel;",
+	"P2oH,Joystick 1,Enabled,Disabled;",
+	"P2oI,Joystick 2,Enabled,Disabled;",
 
 	"h3P3,MT32-pi;",
 	"h3P3-;",
@@ -279,9 +285,6 @@ localparam CONF_STR =
 	"h3P3OTV,SoundFont,0,1,2,3,4,5,6,7;",
 	"h3P3-;",
 	"h3P3r8,Reset Hanging Notes;",
-	"-;",
-	"OCD,Joystick type,2 Buttons,4 Buttons,Gravis Pro,None;",
-	"OP,Joystick Mode,2 Joysticks,2 Sticks;",
 	"-;",
 	"R0,Reset and apply HDD;",
 	"J,Button 1,Button 2,Button 3,Button 4,Start,Select,R1,L1,R2,L2;",
@@ -326,6 +329,7 @@ wire [15:0] JOY3_USB;
 wire [15:0] joystick_l_analog_0;
 wire [15:0] joystick_l_analog_1;
 wire [15:0] joystick_r_analog_0;
+wire [15:0] joystick_r_analog_1;
 
 wire [21:0] gamma_bus;
 wire  [7:0] uart1_mode;
@@ -364,6 +368,7 @@ hps_io #(.CONF_STR(CONF_STR), .CONF_STR_BRAM(0), .PS2DIV(2000), .PS2WE(1), .WIDE
 	.joystick_l_analog_0(joystick_l_analog_0),
 	.joystick_l_analog_1(joystick_l_analog_1),
 	.joystick_r_analog_0(joystick_r_analog_0),
+	.joystick_r_analog_1(joystick_r_analog_1),
 
 	.EXT_BUS(EXT_BUS)
 );
@@ -556,6 +561,7 @@ assign USER_OUT2 = user_io_mode ? {1'b1, 1'b1, uart2_dtr, 1'b1, uart2_rts, uart2
 assign USER_OUT = user_io_mode ? {1'b1, 1'b1, uart2_dtr, 1'b1, uart2_rts, uart2_tx, 1'b1} : mt32_out;
 `endif
 
+assign USER_OUT = user_io_mode ? {1'b1, 1'b1, uart2_dtr, 1'b1, uart2_rts, uart2_tx, 1'b1} : mt32_out;
 
 //
 // Pin | USB Name |   |Signal
@@ -802,8 +808,8 @@ system system
 
 	.joystick_dig_1       (JOY0_USB),
 	.joystick_dig_2       (status[25] ? 14'd0 : JOY1_USB),
-	.joystick_ana_1       (joystick_l_analog_0),
-	.joystick_ana_2       (status[25] ? joystick_r_analog_0 : joystick_l_analog_1),
+	.joystick_ana_1       ({ja_1y,ja_1x}),
+	.joystick_ana_2       ({ja_2y,ja_2x}),
 	.joystick_mode        (status[13:12]),
 
 	.mgmt_readdata        (mgmt_din),
@@ -889,6 +895,46 @@ always @(posedge clk_sys) begin
 	if(status[7]) dbg_menu <= 1;
 end
 
+
+wire  [7:0] ja_1x,ja_1y,ja_2x,ja_2y;
+wire [15:0] dig_mask;
+wire  [1:0] joystick_dis;
+
+wire [7:0] pedal_combo;
+always_comb begin
+	ja_1x = joystick_l_analog_0[7:0];
+	ja_1y = joystick_l_analog_0[15:8];
+	ja_2x = joystick_l_analog_1[7:0];
+	ja_2y = joystick_l_analog_1[15:8];
+	dig_mask = '1;
+	joystick_dis = status[50:49];
+
+	case(status[48:47])
+		1: begin
+				ja_2x = joystick_r_analog_0[7:0];
+				ja_2y = joystick_r_analog_0[15:8];
+				joystick_dis[1] = status[49];
+			end
+		2: begin
+				ja_1y = 0;
+				if(joystick_l_analog_0[15]) ja_1y = joystick_l_analog_0[15:8];
+				if(joystick_r_analog_0[15]) ja_1y = ja_1y - joystick_r_analog_0[15:8];
+				ja_2y = 0;
+				if(joystick_l_analog_1[15]) ja_2y = joystick_l_analog_1[15:8];
+				if(joystick_r_analog_1[15]) ja_2y = ja_2y - joystick_r_analog_1[15:8];
+				dig_mask[3:0] = 0;
+			end
+		3: begin
+				ja_1y = joystick_l_analog_0[15] ? {joystick_l_analog_0[14:8] + 7'd63, 1'b0} : 8'd127;
+				ja_2y = joystick_r_analog_0[15] ? {joystick_r_analog_0[14:8] + 7'd63, 1'b0} : 8'd127;
+				ja_2x = joystick_r_analog_0[7]  ? {joystick_r_analog_0[6:0]  + 7'd63, 1'b0} : 8'd127;
+				dig_mask[3:0] = 0;
+				joystick_dis[1] = status[49];
+			end
+		default:;
+	endcase
+end
+
 ////////////////////////////  MT32pi  ////////////////////////////////// 
 
 wire        mt32_reset    = status[40] | reset;
@@ -914,11 +960,11 @@ mt32pi mt32pi
 	.*,
 	.reset(mt32_reset),
 
-`ifdef SECOND_MT32
-	.USER_IN(user_io_mode ? 7'h7F : USER_IN2),
-`else
-	.USER_IN(user_io_mode ? 7'h7F : USER_IN),
-`endif
+	`ifdef SECOND_MT32
+		.USER_IN(user_io_mode ? 7'h7F : USER_IN2),
+	`else
+		.USER_IN(user_io_mode ? 7'h7F : USER_IN),
+	`endif
 	.USER_OUT(mt32_out),
 	.midi_tx(mpu_tx | mt32_mute)
 );
