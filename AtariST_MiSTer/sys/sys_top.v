@@ -79,14 +79,6 @@ module sys_top
 	input         BTN_OSD,
 	input         BTN_RESET,
 
-	////////// I/O ALT /////////
-	//output        SD_SPI_CS,
-	input         SD_SPI_MISO,
-	output        SD_SPI_CLK,
-	output        SD_SPI_MOSI,
-
-	inout         SDCD_SPDIF,
-
 	////////// ADC //////////////
 	output        ADC_SCK,
 	input         ADC_SDO,
@@ -110,16 +102,11 @@ module sys_top
 wire SD_CS, SD_CLK, SD_MOSI;
 
 	wire sd_miso = SDIO_DAT[0];
-wire SD_MISO = SD_SPI_MISO;
 
 	assign SDIO_DAT[2:1]= 2'bZZ;
 	assign SDIO_DAT[3]  = SD_CS;
 	assign SDIO_CLK     = SD_CLK;
 	assign SDIO_CMD     = SD_MOSI;
-//	assign SD_SPI_CS    = SD_CS;
-
-assign SD_SPI_CLK  = SD_CLK;
-assign SD_SPI_MOSI = SD_MOSI;
 
 //////////////////////  LEDs/Buttons  ///////////////////////////////////
 
@@ -1293,8 +1280,6 @@ always @(posedge clk_vid) begin
 end
 
 /////////////////////////  Audio output  ////////////////////////////////
-
-assign SDCD_SPDIF = 1'bZ;
 
 	wire analog_l, analog_r;
 
