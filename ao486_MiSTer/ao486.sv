@@ -908,7 +908,7 @@ wire mt32_available;
 wire mt32_use  = mt32_available & ~mt32_disable;
 wire mt32_mute = mt32_available &  mt32_disable;
 
-wire [6:0] mt32_out;
+wire [7:0] mt32_out;
 mt32pi mt32pi
 (
 	.*,
