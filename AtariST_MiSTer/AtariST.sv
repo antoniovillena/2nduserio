@@ -132,12 +132,9 @@ module emu
 
 	//SDRAM interface with lower latency
 	output        SDRAM_CLK,
-	output        SDRAM_CKE,
 	output [12:0] SDRAM_A,
 	output  [1:0] SDRAM_BA,
 	inout  [15:0] SDRAM_DQ,
-	output        SDRAM_DQML,
-	output        SDRAM_DQMH,
 	output        SDRAM_nCS,
 	output        SDRAM_nCAS,
 	output        SDRAM_nRAS,
@@ -1525,13 +1522,10 @@ wire [15:0] ram_data_out;
 wire [63:0] ram_data_out64;
 wire [15:0] rom_data_out;
 
-assign SDRAM_CKE = 1'b1;
-
 sdram sdram (
 	// interface to the MT48LC16M16 chip
 	.sd_data     	( SDRAM_DQ                 ),
 	.sd_addr     	( SDRAM_A                  ),
-	.sd_dqm      	( {SDRAM_DQMH, SDRAM_DQML} ),
 	.sd_cs       	( SDRAM_nCS                ),
 	.sd_ba       	( SDRAM_BA                 ),
 	.sd_we       	( SDRAM_nWE                ),

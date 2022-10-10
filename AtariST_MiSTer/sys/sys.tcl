@@ -24,15 +24,6 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to ARDUINO_IO[*]
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to ARDUINO_IO[*]
 
 #============================================================
-# I2C LEDS/BUTTONS
-#============================================================
-set_location_assignment PIN_U14 -to IO_SCL
-set_location_assignment PIN_AG9 -to IO_SDA
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to IO_S*
-set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to IO_S*
-set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to IO_S*
-
-#============================================================
 # USER PORT
 #============================================================
 set_location_assignment PIN_AE15 -to USER_IO[7]
@@ -89,10 +80,7 @@ set_location_assignment PIN_AG14 -to SDRAM_DQ[12]
 set_location_assignment PIN_AD5 -to SDRAM_DQ[13]
 set_location_assignment PIN_AF4 -to SDRAM_DQ[14]
 set_location_assignment PIN_AH3 -to SDRAM_DQ[15]
-set_location_assignment PIN_AG13 -to SDRAM_DQML
-set_location_assignment PIN_AF13 -to SDRAM_DQMH
 set_location_assignment PIN_AD20 -to SDRAM_CLK
-set_location_assignment PIN_AG10 -to SDRAM_CKE
 set_location_assignment PIN_AA19 -to SDRAM_nWE
 set_location_assignment PIN_AA18 -to SDRAM_nCAS
 set_location_assignment PIN_Y18 -to SDRAM_nCS

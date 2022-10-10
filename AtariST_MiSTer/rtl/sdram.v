@@ -29,7 +29,6 @@ module sdram (
 	// interface to the MT48LC16M16 chip
 	inout  reg [15:0]	sd_data,    // 16 bit bidirectional data bus
 	output reg [12:0]	sd_addr,    // 13 bit multiplexed address bus
-	output     [1:0] 	sd_dqm,     // two byte masks
 	output reg [1:0] 	sd_ba,      // two banks
 	output 				sd_cs,      // a single chip select
 	output 				sd_we,      // write enable
@@ -119,7 +118,6 @@ assign sd_cs  = sd_cmd[3];
 assign sd_ras = sd_cmd[2];
 assign sd_cas = sd_cmd[1];
 assign sd_we  = sd_cmd[0];
-assign sd_dqm = sd_addr[12:11];
 
 reg [15:0] sd_din;
 
