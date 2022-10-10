@@ -294,4 +294,6 @@ set_global_assignment -name VERILOG_FILE rtl/linedoubler.v
 set_global_assignment -name VERILOG_FILE hps_ext.v
 set_global_assignment -name SDC_FILE AtariST.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE AtariST.sv
+#set_global_assignment -name VERILOG_MACRO "SECOND_MT32=1"
+
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
