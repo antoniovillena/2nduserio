@@ -74,9 +74,6 @@ assign SDRAM_nCS  = chip;
 assign SDRAM_nRAS = command[2];
 assign SDRAM_nCAS = command[1];
 assign SDRAM_nWE  = command[0];
-assign SDRAM_CKE  = 1;
-assign {SDRAM_DQMH,SDRAM_DQML} = SDRAM_A[12:11];
-
 
 // Burst length = 8
 localparam BURST_LENGTH        = 8;

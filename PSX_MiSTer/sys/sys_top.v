@@ -54,9 +54,9 @@ module sys_top
 	output        SDRAM_CLK,
 
 	//////////// VGA ///////////
-	output  [5:0] VGA_R,
-	output  [5:0] VGA_G,
-	output  [5:0] VGA_B,
+	output  [7:0] VGA_R,
+	output  [7:0] VGA_G,
+	output  [7:0] VGA_B,
 	inout         VGA_HS,  // VGA_HS is secondary SD card detect when VGA_EN = 1 (inactive)
 	output		  VGA_VS,
 	input         VGA_EN,  // active low
@@ -203,7 +203,6 @@ wire       csync_en     = cfg[3];
 wire       io_osd_vga   = io_ss1 & ~io_ss2;
 `ifndef MISTER_DUAL_SDRAM
 	wire    ypbpr_en     = cfg[5];
-	wire    sog          = cfg[9];
 	wire    vga_scaler   = cfg[2] | vga_force_scaler;
 `endif
 
@@ -1264,8 +1263,6 @@ csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
 		.vsync_o(vga_vs),
 		.csync_o(vga_cs)
 	);
-
-	wire cs1 = (vga_fb | vga_scaler) ? vgas_cs : vga_cs;
 
 	assign VGA_VS = (VGA_EN) ? 1'bZ      :((((vga_fb | vga_scaler) ? ~vgas_vs : ~vga_vs) | csync_en) ^ VS[12]);
 	assign VGA_HS = (VGA_EN) ? 1'bZ      : (((vga_fb | vga_scaler) ? (csync_en ? ~vgas_cs : ~vgas_hs) : (csync_en ? ~vga_cs : ~vga_hs)) ^ HS[12]);
